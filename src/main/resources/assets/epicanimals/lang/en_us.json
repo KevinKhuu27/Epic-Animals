@@ -1,0 +1,13 @@
+{
+  "itemGroup.epicanimals": "Example Mod Tab",
+  "block.epicanimals.example_block": "Example Block",
+  "item.epicanimals.example_item": "Example Item",
+
+  "epicanimals.configuration.title": "Epic Animals Configs",
+  "epicanimals.configuration.section.epicanimals.common.toml": "Epic Animals Configs",
+  "epicanimals.configuration.section.epicanimals.common.toml.title": "Epic Animals Configs",
+  "epicanimals.configuration.items": "Item List",
+  "epicanimals.configuration.logDirtBlock": "Log Dirt Block",
+  "epicanimals.configuration.magicNumberIntroduction": "Magic Number Text",
+  "epicanimals.configuration.magicNumber": "Magic Number"
+}
