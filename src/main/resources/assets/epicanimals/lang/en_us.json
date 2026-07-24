@@ -9,5 +9,7 @@
   "epicanimals.configuration.items": "Item List",
   "epicanimals.configuration.logDirtBlock": "Log Dirt Block",
   "epicanimals.configuration.magicNumberIntroduction": "Magic Number Text",
-  "epicanimals.configuration.magicNumber": "Magic Number"
+  "epicanimals.configuration.magicNumber": "Magic Number",
+
+  "entity.epicanimals.capybara": "Capybara"
 }
