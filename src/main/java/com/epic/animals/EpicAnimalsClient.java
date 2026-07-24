@@ -38,5 +38,6 @@ public class EpicAnimalsClient {
     @SubscribeEvent
     static void registerLayerDefinition(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(CapybaraModel.LAYER, CapybaraModel::createBodyLayer);
+        event.registerLayerDefinition(CapybaraModel.BABY_LAYER, BabyCapybaraModel::createBodyLayer);
     }
 }
