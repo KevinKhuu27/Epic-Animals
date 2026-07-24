@@ -1,5 +1,8 @@
 package com.epic.animals;
 
+import com.epic.animals.client.model.BabyCapybaraModel;
+import com.epic.animals.client.model.CapybaraModel;
+import com.epic.animals.client.renderer.CapybaraRenderer;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;

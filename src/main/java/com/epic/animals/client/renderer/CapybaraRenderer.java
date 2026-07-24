@@ -1,5 +1,10 @@
-package com.epic.animals;
+package com.epic.animals.client.renderer;
 
+import com.epic.animals.client.state.CapybaraRenderState;
+import com.epic.animals.EpicAnimals;
+import com.epic.animals.client.model.BabyCapybaraModel;
+import com.epic.animals.client.model.CapybaraModel;
+import com.epic.animals.entity.Capybara;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.AdultAndBabyModelPair;
 import net.minecraft.client.renderer.SubmitNodeCollector;

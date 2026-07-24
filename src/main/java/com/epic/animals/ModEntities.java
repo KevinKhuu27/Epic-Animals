@@ -1,5 +1,6 @@
 package com.epic.animals;
 
+import com.epic.animals.entity.Capybara;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.function.Supplier;

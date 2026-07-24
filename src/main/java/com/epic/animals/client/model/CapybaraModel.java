@@ -1,5 +1,7 @@
-package com.epic.animals;
+package com.epic.animals.client.model;
 
+import com.epic.animals.client.state.CapybaraRenderState;
+import com.epic.animals.EpicAnimals;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;

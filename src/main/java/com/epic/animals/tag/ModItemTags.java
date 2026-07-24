@@ -1,5 +1,6 @@
-package com.epic.animals;
+package com.epic.animals.tag;
 
+import com.epic.animals.EpicAnimals;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;

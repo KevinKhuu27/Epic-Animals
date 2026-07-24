@@ -1,5 +1,6 @@
 package com.epic.animals;
 
+import com.epic.animals.entity.Capybara;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
