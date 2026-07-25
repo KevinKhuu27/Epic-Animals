@@ -29,6 +29,12 @@ public class CapybaraRenderer extends MobRenderer<Capybara, CapybaraRenderState,
     }
 
     @Override
+    protected void scale(CapybaraRenderState state, PoseStack poseStack) {
+        float s = state.ageScale;
+        poseStack.scale(s, s, s);
+    }
+
+    @Override
     public void submit(CapybaraRenderState state, PoseStack poseStack,
                        SubmitNodeCollector collector, CameraRenderState camera) {
         this.model = this.models.getModel(state.isBaby);
