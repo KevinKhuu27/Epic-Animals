@@ -1,5 +1,5 @@
 {
-  "itemGroup.epicanimals": "Example Mod Tab",
+  "itemGroup.epicanimals": "Epic Animals",
   "block.epicanimals.example_block": "Example Block",
   "item.epicanimals.example_item": "Example Item",
 
@@ -10,6 +10,8 @@
   "epicanimals.configuration.logDirtBlock": "Log Dirt Block",
   "epicanimals.configuration.magicNumberIntroduction": "Magic Number Text",
   "epicanimals.configuration.magicNumber": "Magic Number",
+
+  "item.epicanimals.capybara_spawn_egg": "Capybara Spawn Egg",
 
   "entity.epicanimals.capybara": "Capybara"
 }

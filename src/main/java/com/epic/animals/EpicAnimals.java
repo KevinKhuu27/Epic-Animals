@@ -1,6 +1,11 @@
 package com.epic.animals;
 
 import com.epic.animals.config.Config;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.SpawnEggItem;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -27,6 +32,21 @@ public class EpicAnimals {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     // Create a Deferred Register to hold CreativeModeTabs which will all be registered under the "epicanimals" namespace
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+
+    public static final DeferredItem<SpawnEggItem> CAPYBARA_SPAWN_EGG =
+            ITEMS.registerItem("capybara_spawn_egg",
+                    properties -> new SpawnEggItem(
+                            properties.spawnEgg(ModEntities.CAPYBARA.get())
+                    ));
+
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EPICANIMALS_TAB =
+            CREATIVE_MODE_TABS.register("epicanimals_tab", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.epicanimals"))
+                    .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
+                    .icon(() -> CAPYBARA_SPAWN_EGG.get().getDefaultInstance())
+                    .displayItems((parameters, output) -> {
+                        output.accept(CAPYBARA_SPAWN_EGG.get());
+                    }).build());
 
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
