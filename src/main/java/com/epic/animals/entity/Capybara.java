@@ -2,9 +2,12 @@ package com.epic.animals.entity;
 
 import com.epic.animals.ModEntities;
 import com.epic.animals.tag.ModItemTags;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -16,6 +19,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import org.jspecify.annotations.Nullable;
 
 public class Capybara extends Animal {
@@ -77,4 +81,13 @@ public class Capybara extends Animal {
         return SoundEvents.FOX_DEATH;
     }
 
+    public static boolean checkCapybaraSpawnRules(
+            EntityType<? extends Animal> type,
+            LevelAccessor level,
+            EntitySpawnReason reason,
+            BlockPos pos,
+            RandomSource random) {
+        return level.getBlockState(pos.below()).is(BlockTags.FROGS_SPAWNABLE_ON)
+                && isBrightEnoughToSpawn(level, pos);
+    }
 }
