@@ -1,6 +1,5 @@
 package com.epic.animals;
 
-import com.epic.animals.client.model.BabyCapybaraModel;
 import com.epic.animals.client.model.CapybaraModel;
 import com.epic.animals.client.renderer.CapybaraRenderer;
 import net.minecraft.client.Minecraft;
@@ -41,6 +40,5 @@ public class EpicAnimalsClient {
     @SubscribeEvent
     static void registerLayerDefinition(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(CapybaraModel.LAYER, CapybaraModel::createBodyLayer);
-        event.registerLayerDefinition(CapybaraModel.BABY_LAYER, CapybaraModel::createBodyLayer);
     }
 }

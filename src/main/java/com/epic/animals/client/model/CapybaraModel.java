@@ -16,8 +16,6 @@ import net.minecraft.util.Mth;
 public class CapybaraModel extends EntityModel<CapybaraRenderState> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(
             Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "capybara"), "main");
-    public static final ModelLayerLocation BABY_LAYER = new ModelLayerLocation(
-            Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "capybara_baby"), "main");
 
     private final ModelPart head;
     private final ModelPart rightHindLeg;

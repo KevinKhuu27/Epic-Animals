@@ -1,12 +1,12 @@
 package com.epic.animals.entity;
 
 import com.epic.animals.ModEntities;
+import com.epic.animals.tag.ModBlockTags;
 import com.epic.animals.tag.ModItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
@@ -54,20 +54,7 @@ public class Capybara extends Animal {
     }
 
     @Override
-    public void playAmbientSound() {
-        SoundEvent ambient = this.getAmbientSound();
-        if (ambient == SoundEvents.FOX_SCREECH) {
-            this.playSound(ambient, 2.0F, this.getVoicePitch());
-        } else {
-            super.playAmbientSound();
-        }
-    }
-
-    @Override
     protected @Nullable SoundEvent getAmbientSound() {
-        if (this.isSleeping()) {
-            return SoundEvents.FOX_SLEEP;
-        }
         return SoundEvents.FOX_AMBIENT;
     }
 
@@ -87,7 +74,7 @@ public class Capybara extends Animal {
             EntitySpawnReason reason,
             BlockPos pos,
             RandomSource random) {
-        return level.getBlockState(pos.below()).is(BlockTags.FROGS_SPAWNABLE_ON)
+        return level.getBlockState(pos.below()).is(ModBlockTags.CAPYBARA_SPAWNABLE_ON)
                 && isBrightEnoughToSpawn(level, pos);
     }
 }
