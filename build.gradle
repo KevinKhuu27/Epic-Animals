@@ -54,6 +54,19 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        clientTwo {
+            client()
+
+            // Own working directory so it doesn't fight client over file locks
+            gameDirectory = project.file('run/clientTwo')
+
+            // Second identity so the server treats it as a different player
+            programArgument '--username'
+            programArgument 'Player2'
+
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
         server {
             server()
             programArgument '--nogui'

@@ -41,3 +41,6 @@ repo/
 
 # Development
 *.md
+
+.gradle
+build/
