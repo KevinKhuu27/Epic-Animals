@@ -34,4 +34,10 @@ public class CapybaraRenderer extends MobRenderer<Capybara, CapybaraRenderState,
     public Identifier getTextureLocation(CapybaraRenderState state) {
         return state.isBaby ? BABY_TEXTURE : TEXTURE;
     }
+
+    @Override
+    public void extractRenderState(Capybara entity, CapybaraRenderState state, float particalTick) {
+        super.extractRenderState(entity, state, particalTick);
+        state.isSitting = entity.isInSittingPose();
+    }
 }

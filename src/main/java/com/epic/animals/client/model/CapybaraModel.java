@@ -18,6 +18,7 @@ public class CapybaraModel extends EntityModel<CapybaraRenderState> {
             Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "capybara"), "main");
 
     private final ModelPart head;
+    private final ModelPart body;
     private final ModelPart rightHindLeg;
     private final ModelPart leftHindLeg;
     private final ModelPart rightFrontLeg;
@@ -26,6 +27,7 @@ public class CapybaraModel extends EntityModel<CapybaraRenderState> {
     public CapybaraModel(ModelPart root) {
         super(root);
         this.head = root.getChild("head");
+        this.body = root.getChild("body");
         this.rightHindLeg = root.getChild("right_hind_leg");
         this.leftHindLeg = root.getChild("left_hind_leg");
         this.rightFrontLeg = root.getChild("right_front_leg");
@@ -73,11 +75,22 @@ public class CapybaraModel extends EntityModel<CapybaraRenderState> {
         this.head.xRot = state.xRot * ((float) Math.PI / 180F);
         this.head.yRot = state.yRot * ((float) Math.PI / 180F);
 
-        float pos = state.walkAnimationPos;
-        float speed = state.walkAnimationSpeed;
-        this.rightHindLeg.xRot  = Mth.cos(pos) * 1.4F * speed;
-        this.leftHindLeg.xRot   = Mth.cos(pos + (float) Math.PI) * 1.4F * speed;
-        this.rightFrontLeg.xRot = this.leftHindLeg.xRot;
-        this.leftFrontLeg.xRot  = this.rightHindLeg.xRot;
+        if (state.isSitting) {
+            this.body.xRot = -0.25F;
+            this.body.y = 21.0F + 1.0F;
+
+            this.rightHindLeg.y = 19.0F;
+            this.leftHindLeg.y  = 19.0F;
+
+            this.rightHindLeg.z = 4.0F;
+            this.leftHindLeg.z = 4.0F;
+        } else {
+            float pos = state.walkAnimationPos;
+            float speed = state.walkAnimationSpeed;
+            this.rightHindLeg.xRot  = Mth.cos(pos) * 1.4F * speed;
+            this.leftHindLeg.xRot   = Mth.cos(pos + (float) Math.PI) * 1.4F * speed;
+            this.rightFrontLeg.xRot = this.leftHindLeg.xRot;
+            this.leftFrontLeg.xRot  = this.rightHindLeg.xRot;
+        }
     }
 }
