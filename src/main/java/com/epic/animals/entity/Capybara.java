@@ -4,6 +4,7 @@ import com.epic.animals.ModEntities;
 import com.epic.animals.tag.ModBlockTags;
 import com.epic.animals.tag.ModItemTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -11,6 +12,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -23,7 +26,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.neoforge.event.EventHooks;
 import org.jspecify.annotations.Nullable;
 
-public class Capybara extends TamableAnimal {
+public class Capybara extends BuffAnimal {
     public Capybara(EntityType<? extends Capybara> type, Level level) {
         super(type, level);
         this.setTame(false, false);
@@ -31,6 +34,11 @@ public class Capybara extends TamableAnimal {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Animal.createAnimalAttributes().add(Attributes.MAX_HEALTH, 8.0).add(Attributes.MOVEMENT_SPEED, 0.2F);
+    }
+
+    @Override
+    protected Holder<MobEffect> getAuraEffect() {
+        return MobEffects.WATER_BREATHING;
     }
 
     @Override
