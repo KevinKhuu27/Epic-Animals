@@ -111,8 +111,6 @@ public class WoodpeckerModel extends EntityModel<WoodpeckerRenderState> {
                 this.rightWing.zRot = 0.0F;
                 this.leftWing.y += 1.0F;
                 this.rightWing.y += 1.0F;
-                this.leftLeg.y += 1.0F;
-                this.rightLeg.y += 1.0F;
             }
             case STANDING -> {}
         }

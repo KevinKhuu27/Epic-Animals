@@ -15,5 +15,9 @@ public final class ModItemTags {
             Registries.ITEM,
             Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "capybara_taming_food"));
 
-    private ModItemTags() {}
+    public static final TagKey<Item> WOODPECKER_TAMING_FOOD =
+            TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "woodpecker_taming_food"));
+
+    private ModItemTags() {
+    }
 }

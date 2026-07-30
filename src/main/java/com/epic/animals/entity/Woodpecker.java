@@ -1,11 +1,14 @@
 package com.epic.animals.entity;
 
+import com.epic.animals.tag.ModItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
@@ -14,11 +17,7 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
@@ -30,6 +29,7 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.event.EventHooks;
 import org.jspecify.annotations.Nullable;
 
 public class Woodpecker extends TamableAnimal {
@@ -51,15 +51,18 @@ public class Woodpecker extends TamableAnimal {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new PanicGoal(this, 1.25));
-        this.goalSelector.addGoal(2, new WaterAvoidingRandomFlyingGoal(this, 1.0));
-        this.goalSelector.addGoal(3, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(2, new FollowOwnerGoal(this, 1.5, 10.0F, 2.0F));
+        this.goalSelector.addGoal(3, new PanicGoal(this, 1.25));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, stack -> !this.isTame() && stack.is(ModItemTags.WOODPECKER_TAMING_FOOD), false));
+        this.goalSelector.addGoal(5, new WoodpeckerWanderGoal(this, 1.0));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Animal.createAnimalAttributes()
-                .add(Attributes.MAX_HEALTH, 20.0)
+                .add(Attributes.MAX_HEALTH, 10.0)
                 .add(Attributes.FLYING_SPEED, 0.4)
                 .add(Attributes.MOVEMENT_SPEED, 0.2);
     }
@@ -70,6 +73,70 @@ public class Woodpecker extends TamableAnimal {
         flyingPathNavigation.setCanOpenDoors(false);
         flyingPathNavigation.setCanFloat(true);
         return flyingPathNavigation;
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack itemStack = player.getItemInHand(hand);
+
+        if (!this.isTame() && itemStack.is(ModItemTags.WOODPECKER_TAMING_FOOD)) {
+            if (!this.level().isClientSide()) {
+                this.tryToTame(player);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        if (this.isTame() && itemStack.is(ModItemTags.WOODPECKER_TAMING_FOOD)
+                && this.getHealth() < this.getMaxHealth()) {
+            this.usePlayerItem(player, hand, itemStack);
+            if (!this.level().isClientSide()) {
+                this.feed(player, hand, itemStack, 2.0F, 2.0F);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        if (!this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
+            if (!this.level().isClientSide()) {
+                this.setOrderedToSit(!this.isOrderedToSit());
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        return super.mobInteract(player, hand);
+    }
+
+    private void tryToTame(Player player) {
+        if (this.random.nextInt(3) == 0 && !EventHooks.onAnimalTame(this, player)) {
+            this.tame(player);
+            this.level().broadcastEntityEvent(this, (byte) 7);
+        } else {
+            this.level().broadcastEntityEvent(this, (byte) 6);
+        }
+    }
+
+    @Override
+    protected void applyTamingSideEffects() {
+        if (this.isTame()) {
+            this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20.0);
+            this.setHealth(this.getMaxHealth());
+        } else {
+            this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(10.0);
+        }
+    }
+
+    @Override
+    public boolean isFood(ItemStack itemStack) {
+        return false;
+    }
+
+    @Override
+    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
+        return null;
+    }
+
+    @Override
+    public boolean causeFallDamage(double fallDistance, float damageModifier, DamageSource source) {
+        return false;
     }
 
     public void aiStep() {
@@ -93,21 +160,6 @@ public class Woodpecker extends TamableAnimal {
         }
 
         this.flap += this.flapping * 2.0F;
-    }
-
-    @Override
-    public boolean isFood(ItemStack itemStack) {
-        return false;
-    }
-
-    @Override
-    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
-        return null;
-    }
-
-    @Override
-    public boolean causeFallDamage(double fallDistance, float damageModifier, DamageSource source) {
-        return false;
     }
 
     protected boolean isFlapping() {
