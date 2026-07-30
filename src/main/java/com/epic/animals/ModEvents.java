@@ -1,6 +1,7 @@
 package com.epic.animals;
 
 import com.epic.animals.entity.Capybara;
+import com.epic.animals.entity.Woodpecker;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -13,6 +14,7 @@ public final class ModEvents {
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(ModEntities.CAPYBARA.get(), Capybara.createAttributes().build());
+        event.put(ModEntities.WOODPECKER.get(), Woodpecker.createAttributes().build());
     }
 
     @SubscribeEvent

@@ -1,6 +1,7 @@
 package com.epic.animals;
 
 import com.epic.animals.entity.Capybara;
+import com.epic.animals.entity.Woodpecker;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.function.Supplier;
@@ -16,6 +17,13 @@ public final class ModEntities {
             MobCategory.CREATURE,
             builder -> builder.sized(0.9f, 0.8f).clientTrackingRange(10)
         );
+
+    public static final Supplier<EntityType<Woodpecker>> WOODPECKER =
+            ENTITY_TYPES.registerEntityType(
+                    "woodpecker",
+                    Woodpecker::new,
+                    MobCategory.CREATURE,
+                    builder -> builder.sized(0.5F, 0.9F).clientTrackingRange(10));
 
     private ModEntities() {}
 }

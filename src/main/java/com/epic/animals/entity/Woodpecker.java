@@ -1,0 +1,162 @@
+package com.epic.animals.entity;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.FlyingMoveControl;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
+
+public class Woodpecker extends TamableAnimal {
+    public float flap;
+    public float flapSpeed;
+    public float oFlapSpeed;
+    public float oFlap;
+    private float flapping = 1.0F;
+    private float nextFlap = 1.0F;
+
+    public Woodpecker(EntityType<? extends Woodpecker> type, Level level) {
+        super(type, level);
+        this.moveControl = new FlyingMoveControl(this, 10, false);
+        this.setPathfindingMalus(PathType.FIRE_IN_NEIGHBOR, -1.0F);
+        this.setPathfindingMalus(PathType.FIRE, -1.0F);
+        this.setPathfindingMalus(PathType.COCOA, -1.0F);
+    }
+
+    @Override
+    protected void registerGoals() {
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new PanicGoal(this, 1.25));
+        this.goalSelector.addGoal(2, new WaterAvoidingRandomFlyingGoal(this, 1.0));
+        this.goalSelector.addGoal(3, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+    }
+
+    public static AttributeSupplier.Builder createAttributes() {
+        return Animal.createAnimalAttributes()
+                .add(Attributes.MAX_HEALTH, 20.0)
+                .add(Attributes.FLYING_SPEED, 0.4)
+                .add(Attributes.MOVEMENT_SPEED, 0.2);
+    }
+
+    @Override
+    protected PathNavigation createNavigation(Level level) {
+        FlyingPathNavigation flyingPathNavigation = new FlyingPathNavigation(this, level);
+        flyingPathNavigation.setCanOpenDoors(false);
+        flyingPathNavigation.setCanFloat(true);
+        return flyingPathNavigation;
+    }
+
+    public void aiStep() {
+        super.aiStep();
+        this.calculateFlapping();
+    }
+
+    private void calculateFlapping() {
+        this.oFlap = this.flap;
+        this.oFlapSpeed = this.flapSpeed;
+        this.flapSpeed += (float)(!this.onGround() && !this.isPassenger() ? 4 : -1) * 0.3F;
+        this.flapSpeed = Mth.clamp(this.flapSpeed, 0.0F, 1.0F);
+        if (!this.onGround() && this.flapping < 1.0F) {
+            this.flapping = 1.0F;
+        }
+
+        this.flapping *= 0.9F;
+        Vec3 movement = this.getDeltaMovement();
+        if (!this.onGround() && movement.y < (double)0.0F) {
+            this.setDeltaMovement(movement.multiply((double)1.0F, 0.6, (double)1.0F));
+        }
+
+        this.flap += this.flapping * 2.0F;
+    }
+
+    @Override
+    public boolean isFood(ItemStack itemStack) {
+        return false;
+    }
+
+    @Override
+    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
+        return null;
+    }
+
+    @Override
+    public boolean causeFallDamage(double fallDistance, float damageModifier, DamageSource source) {
+        return false;
+    }
+
+    protected boolean isFlapping() {
+        return this.flyDist > this.nextFlap;
+    }
+
+    protected void onFlap() {
+        this.playSound(SoundEvents.PARROT_FLY, 0.15F, 1.0F);
+        this.nextFlap = this.flyDist + this.flapSpeed / 2.0F;
+    }
+
+    public boolean isFlying() {
+        return !this.onGround();
+    }
+
+    private static class WoodpeckerWanderGoal extends WaterAvoidingRandomFlyingGoal {
+        public WoodpeckerWanderGoal(PathfinderMob mob, double speedModifier) {
+            super(mob, speedModifier);
+        }
+
+        protected @Nullable Vec3 getPosition() {
+            Vec3 pos = null;
+            if (this.mob.isInWater()) {
+                pos = LandRandomPos.getPos(this.mob, 15, 15);
+            }
+
+            if (this.mob.getRandom().nextFloat() >= this.probability) {
+                pos = this.getTreePos();
+            }
+
+            return pos == null ? super.getPosition() : pos;
+        }
+
+        private @Nullable Vec3 getTreePos() {
+            BlockPos mobPos = this.mob.blockPosition();
+            BlockPos.MutableBlockPos abovePos = new BlockPos.MutableBlockPos();
+            BlockPos.MutableBlockPos belowPos = new BlockPos.MutableBlockPos();
+
+            for (BlockPos pos : BlockPos.betweenClosed(Mth.floor(this.mob.getX() - (double) 3.0F), Mth.floor(this.mob.getY() - (double) 6.0F), Mth.floor(this.mob.getZ() - (double) 3.0F), Mth.floor(this.mob.getX() + (double) 3.0F), Mth.floor(this.mob.getY() + (double) 6.0F), Mth.floor(this.mob.getZ() + (double) 3.0F))) {
+                if (!mobPos.equals(pos)) {
+                    BlockState state = this.mob.level().getBlockState(belowPos.setWithOffset(pos, Direction.DOWN));
+                    boolean canSitOn = state.getBlock() instanceof LeavesBlock || state.is(BlockTags.LOGS);
+                    if (canSitOn && this.mob.level().isEmptyBlock(pos) && this.mob.level().isEmptyBlock(abovePos.setWithOffset(pos, Direction.UP))) {
+                        return Vec3.atBottomCenterOf(pos);
+                    }
+                }
+            }
+
+            return null;
+        }
+    }
+}
