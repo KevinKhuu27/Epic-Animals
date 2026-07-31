@@ -1,0 +1,10 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": "#epicanimals:woodpecker_spawn_biomes",
+  "spawners": {
+    "type": "epicanimals:woodpecker",
+    "weight": 40,
+    "minCount": 2,
+    "maxCount": 2
+  }
+}

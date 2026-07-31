@@ -26,7 +26,14 @@ public final class ModEvents {
                 Capybara::checkCapybaraSpawnRules,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
+        event.register(
+                ModEntities.WOODPECKER.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Woodpecker::checkWoodpeckerSpawnRules,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
-    private ModEvents() {}
+    private ModEvents() {
+    }
 }

@@ -1,6 +1,7 @@
 package com.epic.animals.entity;
 
 import com.epic.animals.entity.aura.BuffAura;
+import com.epic.animals.tag.ModBlockTags;
 import com.epic.animals.tag.ModItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -8,14 +9,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -27,6 +26,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathType;
@@ -213,5 +213,15 @@ public class Woodpecker extends TamableAnimal {
 
             return null;
         }
+    }
+
+    public static boolean checkWoodpeckerSpawnRules(
+            EntityType<? extends Animal> type,
+            LevelAccessor level,
+            EntitySpawnReason reason,
+            BlockPos pos,
+            RandomSource random) {
+        return level.getBlockState(pos.below()).is(ModBlockTags.WOODPECKER_SPAWNABLE_ON)
+                && isBrightEnoughToSpawn(level, pos);
     }
 }
