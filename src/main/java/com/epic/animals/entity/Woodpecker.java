@@ -1,5 +1,6 @@
 package com.epic.animals.entity;
 
+import com.epic.animals.ModEntities;
 import com.epic.animals.entity.aura.BuffAura;
 import com.epic.animals.tag.ModBlockTags;
 import com.epic.animals.tag.ModItemTags;
@@ -56,10 +57,13 @@ public class Woodpecker extends TamableAnimal {
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new FollowOwnerGoal(this, 1.5, 10.0F, 2.0F));
         this.goalSelector.addGoal(3, new PanicGoal(this, 1.25));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, stack -> !this.isTame() && stack.is(ModItemTags.WOODPECKER_TAMING_FOOD), false));
-        this.goalSelector.addGoal(5, new WoodpeckerWanderGoal(this, 1.0));
-        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new BreedGoal(this, 1.0));
+        this.goalSelector.addGoal(5, new TemptGoal(this, 1.25, this::isFood, false));
+        this.goalSelector.addGoal(5, new TemptGoal(this, 1.25, stack -> !this.isTame() && stack.is(ModItemTags.WOODPECKER_TAMING_FOOD), false));
+        this.goalSelector.addGoal(6, new FollowParentGoal(this, 1.25));
+        this.goalSelector.addGoal(7, new WoodpeckerWanderGoal(this, 1.0));
+        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -97,14 +101,17 @@ public class Woodpecker extends TamableAnimal {
             return InteractionResult.SUCCESS;
         }
 
-        if (!this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
+        InteractionResult result = super.mobInteract(player, hand);
+        if (!result.consumesAction() && this.isTame() && this.isOwnedBy(player) && !this.isFlying()) {
             if (!this.level().isClientSide()) {
                 this.setOrderedToSit(!this.isOrderedToSit());
+                this.jumping = false;
+                this.navigation.stop();
+                this.setTarget(null);
             }
             return InteractionResult.SUCCESS;
         }
-
-        return super.mobInteract(player, hand);
+        return result;
     }
 
     private void tryToTame(Player player) {
@@ -128,12 +135,17 @@ public class Woodpecker extends TamableAnimal {
 
     @Override
     public boolean isFood(ItemStack itemStack) {
-        return false;
+        return itemStack.is(ModItemTags.WOODPECKER_FOOD);
     }
 
     @Override
-    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
-        return null;
+    public @Nullable Woodpecker getBreedOffspring(ServerLevel level, AgeableMob partner) {
+        Woodpecker baby = ModEntities.WOODPECKER.get().create(level, EntitySpawnReason.BREEDING);
+        if (baby != null && this.isTame()) {
+            baby.setOwnerReference(this.getOwnerReference());
+            baby.setTame(true, true);
+        }
+        return baby;
     }
 
     @Override

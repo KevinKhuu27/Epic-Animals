@@ -4,6 +4,7 @@ import com.epic.animals.EpicAnimals;
 import com.epic.animals.client.model.WoodpeckerModel;
 import com.epic.animals.client.state.WoodpeckerRenderState;
 import com.epic.animals.entity.Woodpecker;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.Identifier;
@@ -36,5 +37,12 @@ public class WoodpeckerRenderer
     @Override
     public Identifier getTextureLocation(WoodpeckerRenderState state) {
         return TEXTURE;
+    }
+
+    @Override
+    protected void scale(WoodpeckerRenderState state, PoseStack poseStack) {
+        if (state.isBaby) {
+            poseStack.scale(0.5F, 0.5F, 0.5F);
+        }
     }
 }
