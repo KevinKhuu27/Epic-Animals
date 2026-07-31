@@ -1,5 +1,6 @@
 package com.epic.animals.entity;
 
+import com.epic.animals.entity.aura.BuffAura;
 import com.epic.animals.tag.ModItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,6 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -142,6 +144,7 @@ public class Woodpecker extends TamableAnimal {
     public void aiStep() {
         super.aiStep();
         this.calculateFlapping();
+        BuffAura.tick(this, this.isTame(), MobEffects.HASTE, BuffAura.DEFAULT_RADIUS, 0);
     }
 
     private void calculateFlapping() {
