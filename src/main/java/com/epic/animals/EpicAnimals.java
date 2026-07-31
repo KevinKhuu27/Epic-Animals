@@ -37,6 +37,12 @@ public class EpicAnimals {
                             properties.spawnEgg(ModEntities.CAPYBARA.get())
                     ));
 
+    public static final DeferredItem<SpawnEggItem> WOODPECKER_SPAWN_EGG =
+            ITEMS.registerItem("woodpecker_spawn_egg",
+                    properties -> new SpawnEggItem(
+                            properties.spawnEgg(ModEntities.WOODPECKER.get())
+                    ));
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EPICANIMALS_TAB =
             CREATIVE_MODE_TABS.register("epicanimals_tab", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.epicanimals"))
@@ -44,6 +50,7 @@ public class EpicAnimals {
                     .icon(() -> CAPYBARA_SPAWN_EGG.get().getDefaultInstance())
                     .displayItems((parameters, output) -> {
                         output.accept(CAPYBARA_SPAWN_EGG.get());
+                        output.accept(WOODPECKER_SPAWN_EGG.get());
                     }).build());
 
     // The constructor for the mod class is the first code that is run when your mod is loaded.
