@@ -82,11 +82,13 @@ public class Capybara extends BuffAnimal {
             }
             InteractionResult result = super.mobInteract(player, hand);
             if (!result.consumesAction() && this.isOwnedBy(player)) {
-                this.setOrderedToSit(!this.isOrderedToSit());
-                this.jumping = false;
-                this.navigation.stop();
-                this.setTarget(null);
-                return InteractionResult.SUCCESS.withoutItem();
+                if (!this.level().isClientSide()) {
+                    this.setOrderedToSit(!this.isOrderedToSit());
+                    this.jumping = false;
+                    this.navigation.stop();
+                    this.setTarget(null);
+                }
+                return InteractionResult.SUCCESS;
             }
             return result;
         } else if (!this.level().isClientSide() && itemStack.is(ModItemTags.CAPYBARA_TAMING_FOOD)) {
