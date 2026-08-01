@@ -13,7 +13,9 @@
 
   "item.epicanimals.capybara_spawn_egg": "Capybara Spawn Egg",
   "item.epicanimals.woodpecker_spawn_egg": "Woodpecker Spawn Egg",
+  "item.epicanimals.rhino_beetle_spawn_egg": "Rhino Beetle Spawn Egg",
 
   "entity.epicanimals.capybara": "Capybara",
-  "entity.epicanimals.woodpecker": "Woodpecker"
+  "entity.epicanimals.woodpecker": "Woodpecker",
+  "entity.epicanimals.rhino_beetle": "Rhino Beetle"
 }

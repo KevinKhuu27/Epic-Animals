@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "epicanimals:item/rhino_beetle_spawn_egg"
+  }
+}

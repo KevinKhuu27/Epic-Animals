@@ -1,6 +1,7 @@
 package com.epic.animals;
 
 import com.epic.animals.entity.Capybara;
+import com.epic.animals.entity.RhinoBeetle;
 import com.epic.animals.entity.Woodpecker;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -26,6 +27,13 @@ public final class ModEntities {
                     Woodpecker::new,
                     MobCategory.CREATURE,
                     builder -> builder.sized(0.5F, 0.9F).clientTrackingRange(10));
+
+    public static final Supplier<EntityType<RhinoBeetle>> RHINO_BEETLE =
+            ENTITY_TYPES.registerEntityType(
+                    "rhino_beetle",
+                    RhinoBeetle::new,
+                    MobCategory.CREATURE,
+                    builder -> builder.sized(0.9F, 0.6F).clientTrackingRange(10));
 
     private ModEntities() {
     }

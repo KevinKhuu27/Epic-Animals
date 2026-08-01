@@ -1,8 +1,10 @@
 package com.epic.animals;
 
 import com.epic.animals.client.model.CapybaraModel;
+import com.epic.animals.client.model.RhinoBeetleModel;
 import com.epic.animals.client.model.WoodpeckerModel;
 import com.epic.animals.client.renderer.CapybaraRenderer;
+import com.epic.animals.client.renderer.RhinoBeetleRenderer;
 import com.epic.animals.client.renderer.WoodpeckerRenderer;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -38,11 +40,13 @@ public class EpicAnimalsClient {
     static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.CAPYBARA.get(), CapybaraRenderer::new);
         event.registerEntityRenderer(ModEntities.WOODPECKER.get(), WoodpeckerRenderer::new);
+        event.registerEntityRenderer(ModEntities.RHINO_BEETLE.get(), RhinoBeetleRenderer::new);
     }
 
     @SubscribeEvent
     static void registerLayerDefinition(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(CapybaraModel.LAYER, CapybaraModel::createBodyLayer);
         event.registerLayerDefinition(WoodpeckerModel.LAYER, WoodpeckerModel::createBodyLayer);
+        event.registerLayerDefinition(RhinoBeetleModel.LAYER, RhinoBeetleModel::createBodyLayer);
     }
 }
