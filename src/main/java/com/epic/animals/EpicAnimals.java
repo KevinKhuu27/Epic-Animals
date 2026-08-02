@@ -1,9 +1,14 @@
 package com.epic.animals;
 
+import com.epic.animals.block.RhinoBeetleEggBlock;
 import com.epic.animals.config.Config;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import org.slf4j.Logger;
@@ -26,9 +31,9 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public class EpicAnimals {
     public static final String MODID = "epicanimals";
     public static final Logger LOGGER = LogUtils.getLogger();
-    // Create a Deferred Register to hold Items which will all be registered under the "epicanimals" namespace
+
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
-    // Create a Deferred Register to hold CreativeModeTabs which will all be registered under the "epicanimals" namespace
+    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public static final DeferredItem<SpawnEggItem> CAPYBARA_SPAWN_EGG =
@@ -49,6 +54,18 @@ public class EpicAnimals {
                             properties.spawnEgg(ModEntities.RHINO_BEETLE.get())
                     ));
 
+    public static final DeferredBlock<RhinoBeetleEggBlock> RHINO_BEETLE_EGG =
+            BLOCKS.registerBlock("rhino_beetle_egg", properties ->
+                    new RhinoBeetleEggBlock(
+                            properties.strength(0.5F)
+                                    .sound(SoundType.METAL)
+                                    .randomTicks()
+                                    .noOcclusion()
+                    ));
+
+    public static final DeferredItem<BlockItem> RHINO_BEETLE_EGG_ITEM =
+            ITEMS.registerSimpleBlockItem("rhino_beetle_egg", RHINO_BEETLE_EGG);
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EPICANIMALS_TAB =
             CREATIVE_MODE_TABS.register("epicanimals_tab", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.epicanimals"))
@@ -58,14 +75,14 @@ public class EpicAnimals {
                         output.accept(CAPYBARA_SPAWN_EGG.get());
                         output.accept(WOODPECKER_SPAWN_EGG.get());
                         output.accept(RHINO_BEETLE_SPAWN_EGG.get());
+                        output.accept(RHINO_BEETLE_EGG_ITEM.get());
                     }).build());
 
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public EpicAnimals(IEventBus modEventBus, ModContainer modContainer) {
-        // Register the Deferred Register to the mod event bus so items get registered
         ITEMS.register(modEventBus);
-        // Register the Deferred Register to the mod event bus so tabs get registered
+        BLOCKS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         ModEntities.ENTITY_TYPES.register(modEventBus);
 

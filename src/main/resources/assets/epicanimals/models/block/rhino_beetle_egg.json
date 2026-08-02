@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "all": "epicanimals:block/rhino_beetle_egg",
+    "particle": "epicanimals:block/rhino_beetle_egg"
+  },
+  "elements": [
+    {
+      "from": [3, 0, 3],
+      "to": [12, 7, 12],
+      "faces": {
+        "down":  { "uv": [3, 4, 12, 13], "texture": "#all", "cullface": "down" },
+        "up":    { "uv": [3, 4, 12, 13], "texture": "#all" },
+        "north": { "uv": [3, 0, 12, 7], "texture": "#all" },
+        "south": { "uv": [3, 0, 12, 7], "texture": "#all" },
+        "west":  { "uv": [3, 0, 12, 7], "texture": "#all" },
+        "east":  { "uv": [3, 0, 12, 7], "texture": "#all" }
+      }
+    }
+  ]
+}
