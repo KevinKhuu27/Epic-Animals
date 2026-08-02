@@ -27,6 +27,12 @@ public class RhinoBeetleRenderer
     }
 
     @Override
+    public void extractRenderState(RhinoBeetle entity, RhinoBeetleRenderState state, float partialTick) {
+        super.extractRenderState(entity, state, partialTick);
+        state.idleAnimationState.copyFrom(entity.idleAnimationState);
+    }
+
+    @Override
     protected void scale(RhinoBeetleRenderState state, PoseStack poseStack) {
         float s = state.ageScale;
         poseStack.scale(s, s, s);

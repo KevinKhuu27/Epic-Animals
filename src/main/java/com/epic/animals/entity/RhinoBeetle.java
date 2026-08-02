@@ -13,6 +13,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -29,6 +30,8 @@ import org.jspecify.annotations.Nullable;
 
 public class RhinoBeetle extends BuffAnimal {
 
+    public final AnimationState idleAnimationState = new AnimationState();
+
     public RhinoBeetle(EntityType<? extends RhinoBeetle> type, Level level) {
         super(type, level);
         this.setTame(false, false);
@@ -37,7 +40,8 @@ public class RhinoBeetle extends BuffAnimal {
     public static AttributeSupplier.Builder createAttributes() {
         return Animal.createAnimalAttributes()
                 .add(Attributes.MAX_HEALTH, 100.0D)
-                .add(Attributes.MOVEMENT_SPEED, 0.15D);
+                .add(Attributes.MOVEMENT_SPEED, 0.15D)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.5D);
     }
 
     @Override
@@ -48,7 +52,7 @@ public class RhinoBeetle extends BuffAnimal {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new PanicGoal(this, 2.0D));
+        this.goalSelector.addGoal(1, new PanicGoal(this, 1.0D));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1, 10.0F, 2.0F));
         this.goalSelector.addGoal(4, new BreedGoal(this, 1));
@@ -56,8 +60,14 @@ public class RhinoBeetle extends BuffAnimal {
         this.goalSelector.addGoal(5, new TemptGoal(this, 1.25, stack -> !this.isTame() && stack.is(ModItemTags.RHINO_BEETLE_TAMING_FOOD), false));
         this.goalSelector.addGoal(6, new FollowParentGoal(this, 1.25D));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0D));
-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.level().isClientSide()) {
+            this.idleAnimationState.startIfStopped(this.tickCount);
+        }
     }
 
     @Override
