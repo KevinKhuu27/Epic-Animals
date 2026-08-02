@@ -2,9 +2,12 @@ package com.epic.animals.entity;
 
 import com.epic.animals.ModEntities;
 
+import com.epic.animals.tag.ModBlockTags;
 import com.epic.animals.tag.ModItemTags;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
@@ -20,6 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.neoforge.event.EventHooks;
 import org.jspecify.annotations.Nullable;
 
@@ -121,5 +125,15 @@ public class RhinoBeetle extends BuffAnimal {
         } else {
             this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((double)100.0F);
         }
+    }
+
+    public static boolean checkRhinoBeetleSpawnRules(
+            EntityType<? extends Animal> type,
+            LevelAccessor level,
+            EntitySpawnReason reason,
+            BlockPos pos,
+            RandomSource random) {
+        return level.getBlockState(pos.below()).is(ModBlockTags.RHINO_BEETLE_SPAWNABLE_ON)
+                && isBrightEnoughToSpawn(level, pos);
     }
 }

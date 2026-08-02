@@ -10,7 +10,12 @@ public class ModBlockTags {
     public static final TagKey<Block> CAPYBARA_SPAWNABLE_ON =
             TagKey.create(Registries.BLOCK,
                     Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "capybara_spawnable_on"));
+
     public static final TagKey<Block> WOODPECKER_SPAWNABLE_ON =
             TagKey.create(Registries.BLOCK,
                     Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "woodpecker_spawnable_on"));
+
+    public static final TagKey<Block> RHINO_BEETLE_SPAWNABLE_ON =
+            TagKey.create(Registries.BLOCK,
+                    Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "rhino_beetle_spawnable_on"));
 }

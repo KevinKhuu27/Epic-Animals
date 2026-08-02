@@ -34,6 +34,12 @@ public final class ModEvents {
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 Woodpecker::checkWoodpeckerSpawnRules,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                ModEntities.RHINO_BEETLE.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                RhinoBeetle::checkRhinoBeetleSpawnRules,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
     private ModEvents() {
