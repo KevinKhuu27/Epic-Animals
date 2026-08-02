@@ -21,6 +21,12 @@ public final class ModItemTags {
     public static final TagKey<Item> WOODPECKER_TAMING_FOOD =
             TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "woodpecker_taming_food"));
 
+    public static final TagKey<Item> RHINO_BEETLE_FOOD =
+            TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "rhino_beetle_food"));
+
+    public static final TagKey<Item> RHINO_BEETLE_TAMING_FOOD =
+            TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(EpicAnimals.MODID, "rhino_beetle_taming_food"));
+
     private ModItemTags() {
     }
 }
