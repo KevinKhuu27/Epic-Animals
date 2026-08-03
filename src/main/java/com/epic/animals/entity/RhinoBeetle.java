@@ -16,17 +16,19 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -39,12 +41,16 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.event.EventHooks;
 import org.jspecify.annotations.Nullable;
 
-public class RhinoBeetle extends BuffAnimal {
+public class RhinoBeetle extends BuffAnimal implements NeutralMob {
 
     public final AnimationState idleAnimationState = new AnimationState();
     private static final EntityDataAccessor<Boolean> DATA_HAS_EGG = SynchedEntityData.defineId(RhinoBeetle.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_LAYING_EGG = SynchedEntityData.defineId(RhinoBeetle.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Long> DATA_ANGER_END_TIME = SynchedEntityData.defineId(RhinoBeetle.class, EntityDataSerializers.LONG);
+
     public int layEggCounter;
+    private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 30);
+    @Nullable private EntityReference<LivingEntity> persistentAngerTarget;
 
     public RhinoBeetle(EntityType<? extends RhinoBeetle> type, Level level) {
         super(type, level);
@@ -55,7 +61,8 @@ public class RhinoBeetle extends BuffAnimal {
         return Animal.createAnimalAttributes()
                 .add(Attributes.MAX_HEALTH, 100.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.15D)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 0.5D);
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.5D)
+                .add(Attributes.ATTACK_DAMAGE, 6.0D);
     }
 
     @Override
@@ -66,14 +73,18 @@ public class RhinoBeetle extends BuffAnimal {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new PanicGoal(this, 1.0D));
-        this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.5, 10.0F, 2.0F));
         this.goalSelector.addGoal(4, new RhinoBeetleBreedGoal(this, 1.0));
         this.goalSelector.addGoal(5, new TemptGoal(this, 1.25, this::isFood, false));
         this.goalSelector.addGoal(5, new TemptGoal(this, 1.25, stack -> !this.isTame() && stack.is(ModItemTags.RHINO_BEETLE_TAMING_FOOD), false));
         this.goalSelector.addGoal(6, new FollowParentGoal(this, 1.25D));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0D));
+
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::isAngryAt));
+        this.targetSelector.addGoal(3, new ResetUniversalAngerTargetGoal<>(this, true));
     }
 
     @Override
@@ -116,6 +127,7 @@ public class RhinoBeetle extends BuffAnimal {
                     this.jumping = false;
                     this.navigation.stop();
                     this.setTarget(null);
+                    this.setPersistentAngerEndTime(-1L);
                 }
                 return InteractionResult.SUCCESS;
             }
@@ -152,10 +164,30 @@ public class RhinoBeetle extends BuffAnimal {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(DATA_HAS_EGG, false);
-        builder.define(DATA_LAYING_EGG, false);
+    public boolean doHurtTarget(ServerLevel level, Entity target) {
+        if (target instanceof LivingEntity victim && this.isOwnedBy(victim)) {
+            return false;
+        }
+        boolean hit = super.doHurtTarget(level, target);
+        if (hit && !this.isBaby() && target instanceof LivingEntity victim) {
+            double kbRes  = victim.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+            double launch = 0.4 * Math.max(0.0, 1.0 - kbRes);
+            victim.setDeltaMovement(victim.getDeltaMovement().add(0.0, launch, 0.0));
+            victim.hurtMarked = true;
+        }
+        return hit;
+    }
+
+    @Override
+    public boolean canFallInLove() {
+        return super.canFallInLove() && !this.hasEgg();
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        if (this.isOwnedBy(target)) return false;
+        if (this.isBaby() || this.isOrderedToSit()) return false;
+        return super.canAttack(target);
     }
 
     public boolean hasEgg() { return this.entityData.get(DATA_HAS_EGG); }
@@ -170,25 +202,56 @@ public class RhinoBeetle extends BuffAnimal {
     }
 
     @Override
-    public boolean canFallInLove() {
-        return super.canFallInLove() && !this.hasEgg();
+    public long getPersistentAngerEndTime() {
+        return this.entityData.get(DATA_ANGER_END_TIME);
+    }
+
+    @Override
+    public void setPersistentAngerEndTime(long endTime) {
+        this.entityData.set(DATA_ANGER_END_TIME, endTime);
+    }
+
+    @Override
+    public void startPersistentAngerTimer() {
+        this.setTimeToRemainAngry((long) PERSISTENT_ANGER_TIME.sample(this.random));
+    }
+
+    @Override
+    public @Nullable EntityReference<LivingEntity> getPersistentAngerTarget() {
+        return this.persistentAngerTarget;
+    }
+
+    @Override
+    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> target) {
+        this.persistentAngerTarget = target;
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_HAS_EGG, false);
+        builder.define(DATA_LAYING_EGG, false);
+        builder.define(DATA_ANGER_END_TIME, -1L);
     }
 
     @Override
     public void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.putBoolean("HasEgg", this.hasEgg());
+        this.addPersistentAngerSaveData(output);
     }
 
     @Override
     public void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
         this.setHasEgg(input.getBooleanOr("HasEgg", false));
+        this.readPersistentAngerSaveData(this.level(), input);
     }
 
     @Override
     protected void customServerAiStep(ServerLevel level) {
         super.customServerAiStep(level);
+        this.updatePersistentAnger(level, true);
         if (!this.hasEgg()) {
             return;
         }
