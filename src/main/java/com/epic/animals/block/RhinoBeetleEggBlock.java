@@ -24,7 +24,7 @@ public class RhinoBeetleEggBlock extends Block {
     public static final MapCodec<RhinoBeetleEggBlock> CODEC = simpleCodec(RhinoBeetleEggBlock::new);
     public static final IntegerProperty HATCH = BlockStateProperties.HATCH;
     public static final int MAX_HATCH_LEVEL = 2;
-    private static final VoxelShape SHAPE = Block.box(3.0, 0.0, 3.0, 12.0, 7.0, 12.0);
+    private static final VoxelShape SHAPE = Block.box(4.0, 0.0, 3.0, 12.0, 7.0, 13.0);
 
     @Override
     public MapCodec<RhinoBeetleEggBlock> codec() {
@@ -61,12 +61,6 @@ public class RhinoBeetleEggBlock extends Block {
         }
     }
 
-    /*
-    private boolean shouldUpdateHatchLevel(Level level, BlockPos pos) {
-        float chance = (Float)level.environmentAttributes().getValue(EnvironmentAttributes.TURTLE_EGG_HATCH_CHANCE, pos);
-        return chance > 0.0F && level.getRandom().nextFloat() < chance;
-    }
-    */
     private boolean shouldUpdateHatchLevel(ServerLevel level) {
         float chance = level.getSkyDarken() < 4 ? 0.02F : 0.005F;
         return level.getRandom().nextFloat() < chance;

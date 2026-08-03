@@ -1,7 +1,7 @@
 {
   "variants": {
     "hatch=0": { "model": "epicanimals:block/rhino_beetle_egg" },
-    "hatch=1": { "model": "epicanimals:block/rhino_beetle_egg" },
-    "hatch=2": { "model": "epicanimals:block/rhino_beetle_egg" }
+    "hatch=1": { "model": "epicanimals:block/rhino_beetle_egg_slightly_cracked" },
+    "hatch=2": { "model": "epicanimals:block/rhino_beetle_egg_very_cracked" }
   }
 }
