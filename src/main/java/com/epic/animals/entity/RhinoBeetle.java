@@ -9,6 +9,8 @@ import com.epic.animals.tag.ModItemTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -35,6 +37,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -273,6 +276,16 @@ public class RhinoBeetle extends BuffAnimal implements NeutralMob {
             this.setInLoveTime(600);
         } else {
             this.layEggCounter++;
+            if (this.layEggCounter % 5 == 0) {
+                BlockPos below = eggPos.below();
+                BlockState groundState = level.getBlockState(below);
+                level.sendParticles(
+                        new BlockParticleOption(ParticleTypes.BLOCK, groundState),
+                        this.getX(), this.getY() + 0.1, this.getZ(),
+                        8,
+                        0.2, 0.0, 0.2,
+                        0.02);
+            }
         }
     }
 
