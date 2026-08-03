@@ -1,12 +1,20 @@
 package com.epic.animals.entity;
 
+import com.epic.animals.EpicAnimals;
 import com.epic.animals.ModEntities;
 
+import com.epic.animals.entity.goal.RhinoBeetleBreedGoal;
 import com.epic.animals.tag.ModBlockTags;
 import com.epic.animals.tag.ModItemTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -25,12 +33,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.event.EventHooks;
 import org.jspecify.annotations.Nullable;
 
 public class RhinoBeetle extends BuffAnimal {
 
     public final AnimationState idleAnimationState = new AnimationState();
+    private static final EntityDataAccessor<Boolean> DATA_HAS_EGG = SynchedEntityData.defineId(RhinoBeetle.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_LAYING_EGG = SynchedEntityData.defineId(RhinoBeetle.class, EntityDataSerializers.BOOLEAN);
+    public int layEggCounter;
 
     public RhinoBeetle(EntityType<? extends RhinoBeetle> type, Level level) {
         super(type, level);
@@ -54,8 +68,8 @@ public class RhinoBeetle extends BuffAnimal {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.0D));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
-        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1, 10.0F, 2.0F));
-        this.goalSelector.addGoal(4, new BreedGoal(this, 1));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.5, 10.0F, 2.0F));
+        this.goalSelector.addGoal(4, new RhinoBeetleBreedGoal(this, 1.0));
         this.goalSelector.addGoal(5, new TemptGoal(this, 1.25, this::isFood, false));
         this.goalSelector.addGoal(5, new TemptGoal(this, 1.25, stack -> !this.isTame() && stack.is(ModItemTags.RHINO_BEETLE_TAMING_FOOD), false));
         this.goalSelector.addGoal(6, new FollowParentGoal(this, 1.25D));
@@ -134,6 +148,68 @@ public class RhinoBeetle extends BuffAnimal {
             this.setHealth(this.getMaxHealth());
         } else {
             this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((double)100.0F);
+        }
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_HAS_EGG, false);
+        builder.define(DATA_LAYING_EGG, false);
+    }
+
+    public boolean hasEgg() { return this.entityData.get(DATA_HAS_EGG); }
+
+    public void setHasEgg(boolean hasEgg) { this.entityData.set(DATA_HAS_EGG, hasEgg); }
+
+    public boolean isLayingEgg() { return this.entityData.get(DATA_LAYING_EGG); }
+
+    public void setLayingEgg(boolean laying) {
+        this.layEggCounter = laying ? 1 : 0;
+        this.entityData.set(DATA_LAYING_EGG, laying);
+    }
+
+    @Override
+    public boolean canFallInLove() {
+        return super.canFallInLove() && !this.hasEgg();
+    }
+
+    @Override
+    public void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putBoolean("HasEgg", this.hasEgg());
+    }
+
+    @Override
+    public void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        this.setHasEgg(input.getBooleanOr("HasEgg", false));
+    }
+
+    @Override
+    protected void customServerAiStep(ServerLevel level) {
+        super.customServerAiStep(level);
+        if (!this.hasEgg()) {
+            return;
+        }
+        BlockPos eggPos = this.blockPosition();
+        if (!level.getBlockState(eggPos.below()).isFaceSturdy(level, eggPos.below(), Direction.UP)) {
+            return;
+        }
+        if (!this.isLayingEgg()) {
+            this.setLayingEgg(true);
+        }
+        this.getNavigation().stop();
+        if (this.layEggCounter > this.random.nextInt(200) + 50) {
+            level.playSound(null, eggPos, SoundEvents.TURTLE_LAY_EGG, SoundSource.BLOCKS,
+                    0.3F, 0.9F + level.getRandom().nextFloat() * 0.2F);
+            level.setBlock(eggPos, EpicAnimals.RHINO_BEETLE_EGG.get().defaultBlockState(), 3);
+            level.gameEvent(GameEvent.BLOCK_PLACE, eggPos, GameEvent.Context.of(this, level.getBlockState(eggPos)));
+            this.setHasEgg(false);
+            this.setLayingEgg(false);
+            this.setInLoveTime(600);
+        } else {
+            this.layEggCounter++;
         }
     }
 
