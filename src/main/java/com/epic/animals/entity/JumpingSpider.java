@@ -126,6 +126,16 @@ public class JumpingSpider extends BuffAnimal {
     }
 
     @Override
+    protected void applyTamingSideEffects() {
+        if (this.isTame()) {
+            this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((double)40.0F);
+            this.setHealth(this.getMaxHealth());
+        } else {
+            this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((double)16.0F);
+        }
+    }
+
+    @Override
     public Holder<MobEffect> getAuraEffect() {
         return MobEffects.JUMP_BOOST;
     }
