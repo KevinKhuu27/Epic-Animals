@@ -1,9 +1,11 @@
 package com.epic.animals;
 
 import com.epic.animals.client.model.CapybaraModel;
+import com.epic.animals.client.model.JumpingSpiderModel;
 import com.epic.animals.client.model.RhinoBeetleModel;
 import com.epic.animals.client.model.WoodpeckerModel;
 import com.epic.animals.client.renderer.CapybaraRenderer;
+import com.epic.animals.client.renderer.JumpingSpiderRenderer;
 import com.epic.animals.client.renderer.RhinoBeetleRenderer;
 import com.epic.animals.client.renderer.WoodpeckerRenderer;
 import net.minecraft.client.Minecraft;
@@ -41,6 +43,7 @@ public class EpicAnimalsClient {
         event.registerEntityRenderer(ModEntities.CAPYBARA.get(), CapybaraRenderer::new);
         event.registerEntityRenderer(ModEntities.WOODPECKER.get(), WoodpeckerRenderer::new);
         event.registerEntityRenderer(ModEntities.RHINO_BEETLE.get(), RhinoBeetleRenderer::new);
+        event.registerEntityRenderer(ModEntities.JUMPING_SPIDER.get(), JumpingSpiderRenderer::new);
     }
 
     @SubscribeEvent
@@ -48,5 +51,6 @@ public class EpicAnimalsClient {
         event.registerLayerDefinition(CapybaraModel.LAYER, CapybaraModel::createBodyLayer);
         event.registerLayerDefinition(WoodpeckerModel.LAYER, WoodpeckerModel::createBodyLayer);
         event.registerLayerDefinition(RhinoBeetleModel.LAYER, RhinoBeetleModel::createBodyLayer);
+        event.registerLayerDefinition(JumpingSpiderModel.LAYER, JumpingSpiderModel::createBodyLayer);
     }
 }

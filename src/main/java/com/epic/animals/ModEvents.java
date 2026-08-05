@@ -1,6 +1,7 @@
 package com.epic.animals;
 
 import com.epic.animals.entity.Capybara;
+import com.epic.animals.entity.JumpingSpider;
 import com.epic.animals.entity.RhinoBeetle;
 import com.epic.animals.entity.Woodpecker;
 import net.minecraft.world.entity.SpawnPlacementTypes;
@@ -17,6 +18,7 @@ public final class ModEvents {
         event.put(ModEntities.CAPYBARA.get(), Capybara.createAttributes().build());
         event.put(ModEntities.WOODPECKER.get(), Woodpecker.createAttributes().build());
         event.put(ModEntities.RHINO_BEETLE.get(), RhinoBeetle.createAttributes().build());
+        event.put(ModEntities.JUMPING_SPIDER.get(), JumpingSpider.createAttributes().build());
     }
 
     @SubscribeEvent

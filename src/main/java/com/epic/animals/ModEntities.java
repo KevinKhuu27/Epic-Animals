@@ -1,6 +1,7 @@
 package com.epic.animals;
 
 import com.epic.animals.entity.Capybara;
+import com.epic.animals.entity.JumpingSpider;
 import com.epic.animals.entity.RhinoBeetle;
 import com.epic.animals.entity.Woodpecker;
 import net.minecraft.world.entity.MobCategory;
@@ -34,6 +35,14 @@ public final class ModEntities {
                     RhinoBeetle::new,
                     MobCategory.CREATURE,
                     builder -> builder.sized(0.9F, 0.6F).clientTrackingRange(10));
+
+    public static final Supplier<EntityType<JumpingSpider>> JUMPING_SPIDER =
+            ENTITY_TYPES.registerEntityType(
+                    "jumping_spider",
+                    JumpingSpider::new,
+                    MobCategory.CREATURE,
+                    builder -> builder.sized(0.7F, 0.5F).clientTrackingRange(10)
+            );
 
     private ModEntities() {
     }
