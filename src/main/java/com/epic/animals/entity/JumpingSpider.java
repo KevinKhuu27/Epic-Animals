@@ -1,6 +1,7 @@
 package com.epic.animals.entity;
 
 import com.epic.animals.ModEntities;
+import com.epic.animals.entity.goal.JumpingSpiderLeapGoal;
 import com.epic.animals.tag.ModItemTags;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
@@ -14,9 +15,11 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -42,16 +45,40 @@ public class JumpingSpider extends BuffAnimal {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new PanicGoal(this, 1.25));
-        this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
-        this.goalSelector.addGoal(3, new BreedGoal(this, 1.0));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.1, this::isFood, false));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.1, stack -> !this.isTame() && stack.is(ModItemTags.JUMPING_SPIDER_TAMING_FOOD), false));
-        this.goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.5, 10.0F, 2.0F));
-        this.goalSelector.addGoal(6, new FollowParentGoal(this, 1.1));
-        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(2, new JumpingSpiderLeapGoal(this, 1.0, 20.0, 0.2, 0.42, 30));
+        this.goalSelector.addGoal(3, new MeleeAttackGoal(this, 0.75, true));
+        this.goalSelector.addGoal(4, new BreedGoal(this, 1.0));
+        this.goalSelector.addGoal(5, new TemptGoal(this, 1.1, this::isFood, false));
+        this.goalSelector.addGoal(5, new TemptGoal(this, 1.1, stack -> !this.isTame() && stack.is(ModItemTags.JUMPING_SPIDER_TAMING_FOOD), false));
+        this.goalSelector.addGoal(6, new FollowOwnerGoal(this, 1.5, 10.0F, 2.0F));
+        this.goalSelector.addGoal(7, new FollowParentGoal(this, 1.1));
+        this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(9, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
+
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<Player>(
+                this, Player.class, 10, true, false,
+                (entity, serverLevel) -> !this.isTame() && !this.isPacifiedBy(entity)));
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (!this.level().isClientSide()) {
+            LivingEntity target = this.getTarget();
+            if (target != null && (this.isTame() || this.isPacifiedBy(target))) {
+                this.setTarget(null);
+            }
+        }
+    }
+
+    private static boolean isCalmingItem(ItemStack stack) {
+        return stack.is(ModItemTags.JUMPING_SPIDER_FOOD) || stack.is(ModItemTags.JUMPING_SPIDER_TAMING_FOOD);
+    }
+
+    private boolean isPacifiedBy(LivingEntity entity) {
+        return entity.isHolding(JumpingSpider::isCalmingItem);
     }
 
     @Override
