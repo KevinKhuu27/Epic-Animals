@@ -1,10 +1,13 @@
 package com.epic.animals.entity;
 
 import com.epic.animals.ModEntities;
+import com.epic.animals.tag.ModItemTags;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
@@ -13,15 +16,12 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.event.EventHooks;
 import org.jspecify.annotations.Nullable;
 
 public class JumpingSpider extends BuffAnimal {
@@ -43,9 +43,55 @@ public class JumpingSpider extends BuffAnimal {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.25));
+        this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(3, new BreedGoal(this, 1.0));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.1, this::isFood, false));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.1, stack -> !this.isTame() && stack.is(ModItemTags.JUMPING_SPIDER_TAMING_FOOD), false));
+        this.goalSelector.addGoal(5, new FollowOwnerGoal(this, 1.5, 10.0F, 2.0F));
+        this.goalSelector.addGoal(6, new FollowParentGoal(this, 1.1));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack itemStack = player.getItemInHand(hand);
+
+        if (this.isTame()) {
+            if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
+                this.feed(player, hand, itemStack, 2.0F, 2.0F);
+                return InteractionResult.SUCCESS;
+            }
+
+            InteractionResult result = super.mobInteract(player, hand);
+            if (!result.consumesAction() && this.isOwnedBy(player)) {
+                this.setOrderedToSit(!this.isOrderedToSit());
+                this.jumping = false;
+                this.navigation.stop();
+                this.setTarget(null);
+                return InteractionResult.SUCCESS;
+            }
+            return result;
+        } else if (!this.level().isClientSide() && itemStack.is(ModItemTags.JUMPING_SPIDER_TAMING_FOOD)) {
+            itemStack.consume(1, player);
+            this.tryToTame(player);
+            return InteractionResult.SUCCESS_SERVER;
+        }
+
+        return super.mobInteract(player, hand);
+    }
+
+    private void tryToTame(Player player) {
+        if (this.random.nextInt(3) == 0 && !EventHooks.onAnimalTame(this, player)) {
+            this.tame(player);
+            this.navigation.stop();
+            this.setTarget(null);
+            this.setOrderedToSit(true);
+            this.level().broadcastEntityEvent(this, (byte) 7);
+        } else {
+            this.level().broadcastEntityEvent(this, (byte) 6);
+        }
     }
 
     @Override
@@ -56,12 +102,17 @@ public class JumpingSpider extends BuffAnimal {
     @Override
     @Nullable
     public JumpingSpider getBreedOffspring(ServerLevel level, AgeableMob parent) {
-        return ModEntities.JUMPING_SPIDER.get().create(level, EntitySpawnReason.BREEDING);
+        JumpingSpider child = ModEntities.JUMPING_SPIDER.get().create(level, EntitySpawnReason.BREEDING);
+        if (child != null && this.isTame()) {
+            child.setOwnerReference(this.getOwnerReference());
+            child.setTame(true, true);
+        }
+        return child;
     }
 
     @Override
     public boolean isFood(ItemStack stack) {
-        return false;
+        return stack.is(ModItemTags.JUMPING_SPIDER_FOOD);
     }
 
     @Override
