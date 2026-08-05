@@ -42,6 +42,12 @@ public final class ModEvents {
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 RhinoBeetle::checkRhinoBeetleSpawnRules,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        event.register(
+                ModEntities.JUMPING_SPIDER.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                JumpingSpider::checkJumpingSpiderSpawnRules,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
     private ModEvents() {
